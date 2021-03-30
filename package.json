@@ -1,0 +1,16 @@
+{
+  "name": "euler-beats-subgraph",
+  "version": "1.0.0",
+  "description": "Subgraph for euler beats",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/protofire/euler-beats-subgraph.git"
+  },
+  "author": "protofire",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/protofire/euler-beats-subgraph/issues"
+  },
+  "homepage": "https://github.com/protofire/euler-beats-subgraph#readme"
+}
