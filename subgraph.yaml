@@ -3,20 +3,26 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: EulerBeats
+    name: EulerBeats-genesis
     network: mainnet
     source:
-      address:
-      abi:
-      startBlock:
+      address: "0x8754F54074400CE745a7CEddC928FB1b7E985eD6"
+      abi: EulerBeatsGenesis
+      startBlock: 11850423
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        -
+        - Original
       abis:
-        - name: EulerBeats
-          file: ./abis/EulerBeats.json
+        - name: EulerBeatsGenesis
+          file: ./abis/EulerBeatsGenesis.json
       eventHandlers:
+        - event: MintOriginal(address indexed to, uint256 seed, uint256 indexed originalsMinted)
+          handler: handleMintOriginal
+        - event: PrintMinted(address indexed to,uint256 id,uint256 indexed seed,uint256 pricePaid,uint256 nextPrintPrice,uint256 nextBurnPrice,uint256 printsSupply,uint256 royaltyPaid,uint256 reserve,address indexed royaltyRecipient)
+          handler: handlePrintMinted
+        - event: PrintBurned(address indexed to,uint256 id,uint256 indexed seed,uint256 priceReceived,uint256 nextPrintPrice,uint256 nextBurnPrice,uint256 printsSupply,uint256 reserve)
+          handler: handlePrintBurned
       file: ./src/mapping.ts
