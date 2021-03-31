@@ -19,10 +19,10 @@ dataSources:
         - name: EulerBeatsGenesis
           file: ./abis/EulerBeatsGenesis.json
       eventHandlers:
-        - event: MintOriginal(address indexed to, uint256 seed, uint256 indexed originalsMinted)
+        - event: MintOriginal(indexed address,uint256,indexed uint256)
           handler: handleMintOriginal
-        - event: PrintMinted(address indexed to,uint256 id,uint256 indexed seed,uint256 pricePaid,uint256 nextPrintPrice,uint256 nextBurnPrice,uint256 printsSupply,uint256 royaltyPaid,uint256 reserve,address indexed royaltyRecipient)
+        - event: PrintMinted(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint256,indexed address)
           handler: handlePrintMinted
-        - event: PrintBurned(address indexed to,uint256 id,uint256 indexed seed,uint256 priceReceived,uint256 nextPrintPrice,uint256 nextBurnPrice,uint256 printsSupply,uint256 reserve)
+        - event: PrintBurned(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handlePrintBurned
       file: ./src/mapping.ts
