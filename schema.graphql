@@ -1,3 +1,8 @@
-type Original @entity {
+type OriginalGenesisToken @entity {
  id: ID!
+}
+
+type Account @entity {
+	id: ID!
+	# balances: [Balance!]! @derivedFrom(field: "account")
 }
