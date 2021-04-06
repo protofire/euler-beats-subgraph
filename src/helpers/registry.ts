@@ -1,17 +1,15 @@
 import { integer } from '@protofire/subgraph-toolkit'
 
 import { GenesisOriginals } from '../../generated/schema'
-
-
-let genesisOriginalsId = "foo"
+import { registry as registryConstants } from '../constants'
 
 export namespace registry {
 	export namespace genesisOriginals {
 
 		export function getRegistry(): GenesisOriginals {
-			let genesisOriginals = GenesisOriginals.load(genesisOriginalsId)
+			let genesisOriginals = GenesisOriginals.load(registryConstants.genesisOriginalsId)
 			if (genesisOriginals == null) {
-				genesisOriginals = new GenesisOriginals(genesisOriginalsId)
+				genesisOriginals = new GenesisOriginals(registryConstants.genesisOriginalsId)
 				genesisOriginals.originalsMinted = integer.ZERO
 			}
 			return genesisOriginals as GenesisOriginals

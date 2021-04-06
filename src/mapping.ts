@@ -3,7 +3,7 @@ import {
 	MintOriginal as MintOriginalEvent
 } from "../generated/EulerBeats-genesis/EulerBeatsGenesis";
 
-import { accounts, registry } from "./helpers";
+import { accounts, registry, tokens } from "./helpers";
 
 export function handleTransferSingle(event: TransferSingleEvent): void {
 	let fromId = event.params.from.toHex()
@@ -16,12 +16,19 @@ export function handleTransferSingle(event: TransferSingleEvent): void {
 
 }
 
+// _mint yields handleTransferSingle 
+// will this be duplicated?
+
 export function handleMintOriginal(event: MintOriginalEvent): void {
-	let toId = event.params.to.toHex()
-	let to = accounts.getAccount(toId)
+	// handleTransferSingle will take care of this
+	// let toId = event.params.to.toHex()
+	// let to = accounts.getAccount(toId)
+
+	let timestamp = event.block.timestamp
 
 	let tokenId = event.params.seed.toHex()
-	// let token = 
+	let token = tokens.genesisOriginals.getNewToken(tokenId, timestamp)
+	token.save()
 
 	let genesisOriginalsRegistry = registry.genesisOriginals.increaseOriginalsMinted()
 	genesisOriginalsRegistry.save()
