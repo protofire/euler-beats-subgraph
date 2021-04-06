@@ -1,5 +1,12 @@
-type OriginalGenesisToken @entity {
- id: ID!
+type GenesisOriginals @entity {
+	id: ID!
+	tokens: [Token!]! @derivedFrom(field: "registry")
+	originalsMinted: BigInt!
+} 
+
+type Token @entity {
+ 	id: ID!
+	registry: GenesisOriginals!
 }
 
 type Account @entity {

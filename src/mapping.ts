@@ -1,8 +1,9 @@
 import {
-	TransferSingle as TransferSingleEvent
+	TransferSingle as TransferSingleEvent,
+	MintOriginal as MintOriginalEvent
 } from "../generated/EulerBeats-genesis/EulerBeatsGenesis";
 
-import { accounts } from "./helpers";
+import { accounts, registry } from "./helpers";
 
 export function handleTransferSingle(event: TransferSingleEvent): void {
 	let fromId = event.params.from.toHex()
@@ -15,7 +16,16 @@ export function handleTransferSingle(event: TransferSingleEvent): void {
 
 }
 
-export function handleMintOriginal() { }
+export function handleMintOriginal(event: MintOriginalEvent): void {
+	let toId = event.params.to.toHex()
+	let to = accounts.getAccount(toId)
+
+	let tokenId = event.params.seed.toHex()
+	// let token = 
+
+	let genesisOriginalsRegistry = registry.genesisOriginals.increaseOriginalsMinted()
+	genesisOriginalsRegistry.save()
+}
 
 export function handlePrintMinted() { }
 
