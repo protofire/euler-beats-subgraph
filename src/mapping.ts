@@ -25,9 +25,10 @@ export function handleMintOriginal(event: MintOriginalEvent): void {
 	// let to = accounts.getAccount(toId)
 
 	let timestamp = event.block.timestamp
+	let ownerId = event.params.to.toHex()
 
 	let tokenId = event.params.seed.toHex()
-	let token = tokens.genesisOriginals.getNewToken(tokenId, timestamp)
+	let token = tokens.genesisOriginals.getNewToken(tokenId, ownerId, timestamp)
 	token.save()
 
 	let genesisOriginalsRegistry = registry.genesisOriginals.increaseOriginalsMinted()
