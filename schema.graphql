@@ -1,18 +1,44 @@
 type GenesisOriginals @entity {
 	id: ID!
 	tokens: [Token!]! @derivedFrom(field: "registry")
-	originalsMinted: BigInt!
+	tokensMinted: BigInt!
+	totalPrintsMinted: BigInt!
+	maxSeedSupply: BigInt!
+	maxPrintSupply: BigInt!
 } 
 
 type Token @entity {
  	id: ID!
+	seed: BigInt!
 	owner: Account!
 	registry: GenesisOriginals!
 	timestamp: BigInt!
+	printsMinted: BigInt!
+	nextPrintPrice: BigInt!
+    nextBurnPrice: BigInt!
+	prints: [Print!]! @derivedFrom(field: "token")
+
+}
+
+type Print @entity {
+ 	id: ID!
+	token: Token!
+    pricePaid: BigInt!
+    nextPrintPrice: BigInt!
+    nextBurnPrice: BigInt!
+    royalty: Royalty!
+    # reserve qué es esto?
+}
+
+type Royalty @entity {
+	id: ID!
+	amount: BigInt!
+	recipient: Account!
+	print: Print!
 }
 
 type Account @entity {
 	id: ID!
 	tokens: [Token!]! @derivedFrom(field: "owner")
-	# balances: [Balance!]! @derivedFrom(field: "account")
+	royalties: [Royalty!] @derivedFrom(field: "recipient")
 }

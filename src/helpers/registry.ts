@@ -10,14 +10,15 @@ export namespace registry {
 			let genesisOriginals = GenesisOriginals.load(registryConstants.genesisOriginalsId)
 			if (genesisOriginals == null) {
 				genesisOriginals = new GenesisOriginals(registryConstants.genesisOriginalsId)
-				genesisOriginals.originalsMinted = integer.ZERO
+				genesisOriginals.tokensMinted = integer.ZERO
+				genesisOriginals.totalPrintsMinted = integer.ZERO
 			}
 			return genesisOriginals as GenesisOriginals
 		}
 
-		export function increaseOriginalsMinted() {
+		export function increaseTokensMinted() {
 			let genesisOriginals = getRegistry()
-			genesisOriginals.originalsMinted = genesisOriginals.originalsMinted.plus(integer.ONE)
+			genesisOriginals.tokensMinted = genesisOriginals.tokensMinted.plus(integer.ONE)
 			return genesisOriginals as GenesisOriginals
 		}
 	}

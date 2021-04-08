@@ -1,40 +1,72 @@
 import {
 	TransferSingle as TransferSingleEvent,
-	MintOriginal as MintOriginalEvent
+	MintOriginal as MintOriginalEvent,
+	PrintMinted as PrintMintedEvent
 } from "../generated/EulerBeats-genesis/EulerBeatsGenesis";
 
-import { accounts, registry, tokens } from "./helpers";
+import { accounts, registry, tokens, prints, royalties } from "./helpers";
 
 export function handleTransferSingle(event: TransferSingleEvent): void {
-	let fromId = event.params.from.toHex()
-	let from = accounts.getAccount(fromId)
-
 	let toId = event.params.to.toHex()
-	let to = accounts.getAccount(toId)
 
+	// This is duplication
 	let tokenId = event.params.id.toHex()
-
+	let token = tokens.changeOwner(tokenId, toId)
+	token.save()
 }
 
 // _mint yields handleTransferSingle 
-// will this be duplicated?
-
+// will this be duplicated
 export function handleMintOriginal(event: MintOriginalEvent): void {
-	// handleTransferSingle will take care of this
-	// let toId = event.params.to.toHex()
-	// let to = accounts.getAccount(toId)
-
 	let timestamp = event.block.timestamp
 	let ownerId = event.params.to.toHex()
 
-	let tokenId = event.params.seed.toHex()
-	let token = tokens.genesisOriginals.getNewToken(tokenId, ownerId, timestamp)
+	let token = tokens.genesisOriginals.getNewToken(event.params.seed, ownerId, timestamp)
 	token.save()
 
-	let genesisOriginalsRegistry = registry.genesisOriginals.increaseOriginalsMinted()
+	let genesisOriginalsRegistry = registry.genesisOriginals.increaseTokensMinted()
 	genesisOriginalsRegistry.save()
 }
 
-export function handlePrintMinted() { }
+export function handlePrintMinted(event: PrintMintedEvent): void {
+	let accountId = event.params.to.toHex()
+	let tokenId = event.params.seed.toHex()
+	let printId = prints.composeNewPrintId(accountId, tokenId)
+	let royaltyId = royalties.composeNewRoyaltyId(accountId, printId, event.block.timestamp.toHex())
+
+	let token = tokens.increasePrintsMinted(tokenId)
+	token.save()
+
+	let royalty = royalties.getNewRoyalty(
+		royaltyId,
+		accountId,
+		printId,
+		event.params.royaltyPaid
+	)
+	royalty.save()
+
+	let print = prints.getNewPrint(
+		printId,
+		tokenId,
+		royaltyId,
+		event.params.pricePaid,
+		event.params.nextPrintPrice,
+		event.params.nextBurnPrice
+	)
+	print.save()
+	/*
+			address indexed to,
+		uint256 id,
+		uint256 indexed seed,
+		uint256 pricePaid,
+		uint256 nextPrintPrice,
+		uint256 nextBurnPrice,
+		uint256 printsSupply,
+		uint256 royaltyPaid,
+		uint256 reserve,
+		address indexed royaltyRecipient
+	*/
+
+}
 
 export function handlePrintBurned() { }
