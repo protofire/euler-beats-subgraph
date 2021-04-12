@@ -34,17 +34,23 @@ export function handleMintOriginal(event: MintOriginalEvent): void {
 }
 
 export function handlePrintMinted(event: PrintMintedEvent): void {
-	let accountId = event.params.to.toHex()
 	let tokenId = event.params.seed.toHex()
-	let printId = event.params.id.toHex()
-	let royaltyId = royalties.composeNewRoyaltyId(accountId, printId)
+	let royaltyRecipient = event.params.royaltyRecipient.toHex()
+
+	let printId = prints.composeNewPrintId(tokenId, event.block.timestamp.toHex())
+	let royaltyId = royalties.composeNewRoyaltyId(royaltyRecipient, printId)
+
+	// at contract level, reserveCut value is sent as "nextBurnPrice" in *emit PrintMinted*
+	let genesisOriginalsRegistry = registry.genesisOriginals.addReserveCut(event.params.nextBurnPrice)
+	genesisOriginalsRegistry.save()
+
 
 	let token = tokens.increasePrintsMinted(tokenId)
 	token.save()
 
 	let royalty = royalties.getNewRoyalty(
 		royaltyId,
-		accountId,
+		royaltyRecipient,
 		printId,
 		event.params.royaltyPaid
 	)
@@ -53,24 +59,13 @@ export function handlePrintMinted(event: PrintMintedEvent): void {
 	let print = prints.getNewPrint(
 		printId,
 		tokenId,
+		event.params.to.toHex(),
 		royaltyId,
 		event.params.pricePaid,
 		event.params.nextPrintPrice,
 		event.params.nextBurnPrice
 	)
 	print.save()
-	/*
-			address indexed to,
-		uint256 id,
-		uint256 indexed seed,
-		uint256 pricePaid,
-		uint256 nextPrintPrice,
-		uint256 nextBurnPrice,
-		uint256 printsSupply,
-		uint256 royaltyPaid,
-		uint256 reserve,
-		address indexed royaltyRecipient
-	*/
 
 }
 

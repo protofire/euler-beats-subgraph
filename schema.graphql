@@ -5,6 +5,7 @@ type GenesisOriginals @entity {
 	totalPrintsMinted: BigInt!
 	maxSeedSupply: BigInt!
 	maxPrintSupply: BigInt!
+	reserve: BigInt!
 } 
 
 type Token @entity {
@@ -27,7 +28,7 @@ type Print @entity {
     nextPrintPrice: BigInt!
     nextBurnPrice: BigInt!
     royalty: Royalty!
-    # reserve qué es esto?
+	owner: Account
 }
 
 type Royalty @entity {
@@ -39,6 +40,7 @@ type Royalty @entity {
 
 type Account @entity {
 	id: ID!
+	prints: [Print!]! @derivedFrom(field: "owner")
 	tokens: [Token!]! @derivedFrom(field: "owner")
 	royalties: [Royalty!] @derivedFrom(field: "recipient")
 }
