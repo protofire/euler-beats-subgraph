@@ -2,8 +2,8 @@ import { BigInt } from "@graphprotocol/graph-ts";
 import { Royalty } from "../../generated/schema";
 
 export namespace royalties {
-	export function composeNewRoyaltyId(accountId: string, tokenId: string, timestamp: string): string {
-		return accountId + "@" + tokenId + "@" + timestamp
+	export function composeNewRoyaltyId(accountId: string, tokenId: string): string {
+		return accountId + "@" + tokenId
 	}
 	export function getNewRoyalty(
 		royaltyId: string, accountId: string,

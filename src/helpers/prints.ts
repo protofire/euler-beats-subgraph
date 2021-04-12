@@ -3,10 +3,6 @@ import { Print } from '../../generated/schema';
 
 export namespace prints {
 
-	export function composeNewPrintId(tokenId: string, printId: string): string {
-		return tokenId + '@' + printId
-	}
-
 	export function getNewPrint(
 		printId: string, tokenId: string, royaltyId: string,
 		pricePaid: BigInt, nextPrintPrice: BigInt, nextBurnPrice: BigInt,

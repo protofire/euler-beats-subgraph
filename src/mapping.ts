@@ -4,14 +4,19 @@ import {
 	PrintMinted as PrintMintedEvent
 } from "../generated/EulerBeats-genesis/EulerBeatsGenesis";
 
+import { ADDRESS_ZERO } from '@protofire/subgraph-toolkit'
+
 import { accounts, registry, tokens, prints, royalties } from "./helpers";
 
 export function handleTransferSingle(event: TransferSingleEvent): void {
-	let toId = event.params.to.toHex()
+	let fromId = event.params.from.toHex()
 
-	// This is duplication
-	let tokenId = event.params.id.toHex()
-	let token = tokens.changeOwner(tokenId, toId)
+	if (fromId == ADDRESS_ZERO) {
+		return
+	}
+
+	let token = tokens.loadGenericToken(event.params.id.toHex())
+	token.owner = event.params.to.toHex()
 	token.save()
 }
 
@@ -31,8 +36,8 @@ export function handleMintOriginal(event: MintOriginalEvent): void {
 export function handlePrintMinted(event: PrintMintedEvent): void {
 	let accountId = event.params.to.toHex()
 	let tokenId = event.params.seed.toHex()
-	let printId = prints.composeNewPrintId(accountId, tokenId)
-	let royaltyId = royalties.composeNewRoyaltyId(accountId, printId, event.block.timestamp.toHex())
+	let printId = event.params.id.toHex()
+	let royaltyId = royalties.composeNewRoyaltyId(accountId, printId)
 
 	let token = tokens.increasePrintsMinted(tokenId)
 	token.save()

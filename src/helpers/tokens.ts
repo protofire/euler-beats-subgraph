@@ -2,12 +2,15 @@ import { BigInt } from '@graphprotocol/graph-ts'
 import { integer } from '@protofire/subgraph-toolkit'
 import { Token } from '../../generated/schema'
 import { registry as registryConstants } from '../constants'
+import { shared } from "./shared";
 
 export namespace tokens {
 	export function loadGenericToken(tokenId: string): Token {
 		let token = Token.load(tokenId)
 		if (token == null) {
-			// throw err
+			shared.logs.logCritical(
+				"loadGenericToken",
+				"Couldn't find token w/ id: " + tokenId)
 		}
 		return token as Token
 	}
