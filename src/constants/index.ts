@@ -1,4 +1,5 @@
 
 export namespace registry {
-	export let genesisOriginalsId = "0x0"
+	export let genesisId = "0x0"
+	export let enigmaId = "0x1"
 }

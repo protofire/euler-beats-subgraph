@@ -14,15 +14,47 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - Original
+        - Account
+        - Royalty
+        - Print
+        - Token
+        - GenesisOriginals
       abis:
         - name: EulerBeatsGenesis
           file: ./abis/EulerBeatsGenesis.json
       eventHandlers:
         - event: MintOriginal(indexed address,uint256,indexed uint256)
-          handler: handleMintOriginal
+          handler: handleGenesisMintOriginal
         - event: PrintMinted(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint256,indexed address)
-          handler: handlePrintMinted
+          handler: handleGenesisPrintMinted
         - event: PrintBurned(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256)
-          handler: handlePrintBurned
+          handler: handleGensisPrintBurned
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: EulerBeats-enigma
+    network: mainnet
+    source:
+      address: "0xa98771a46Dcb34B34cDAD5355718F8a97C8E603e"
+      abi: EulerBeatsEnigma
+      startBlock: 12103580
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Account
+        - Royalty
+        - Print
+        - Token
+        - EnigmaOriginals
+      abis:
+        - name: EulerBeatsEnigma
+          file: ./abis/EulerBeatsEnigma.json
+      eventHandlers:
+        - event: MintOriginal(indexed address,uint256,indexed uint256)
+          handler: handleEnigmaMintOriginal
+        - event: PrintMinted(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleEnigmaPrintMinted
+        - event: PrintBurned(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleEnigmaPrintBurned
       file: ./src/mapping.ts

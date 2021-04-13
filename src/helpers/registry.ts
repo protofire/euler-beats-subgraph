@@ -1,39 +1,37 @@
 import { BigInt } from '@graphprotocol/graph-ts'
 import { integer } from '@protofire/subgraph-toolkit'
 
-import { GenesisOriginals } from '../../generated/schema'
-import { registry as registryConstants } from '../constants'
+import { Registry } from '../../generated/schema'
 
 export namespace registry {
-	export namespace genesisOriginals {
 
-		export function getRegistry(): GenesisOriginals {
-			let genesisOriginals = GenesisOriginals.load(registryConstants.genesisOriginalsId)
-			if (genesisOriginals == null) {
-				genesisOriginals = new GenesisOriginals(registryConstants.genesisOriginalsId)
-				genesisOriginals.tokensMinted = integer.ZERO
-				genesisOriginals.totalPrintsMinted = integer.ZERO
-				genesisOriginals.reserve = integer.ZERO
-			}
-			return genesisOriginals as GenesisOriginals
+	export function getRegistry(registryId: string): Registry {
+		let registry = Registry.load(registryId)
+		if (registry == null) {
+			registry = new Registry(registryId)
+			registry.tokensMinted = integer.ZERO
+			registry.totalPrintsMinted = integer.ZERO
+			registry.reserve = integer.ZERO
 		}
-
-		export function increaseTokensMinted(): GenesisOriginals {
-			let genesisOriginals = getRegistry()
-			genesisOriginals.tokensMinted = genesisOriginals.tokensMinted.plus(integer.ONE)
-			return genesisOriginals as GenesisOriginals
-		}
-
-		export function addReserveCut(reserveCut: BigInt): GenesisOriginals {
-			let genesisOriginals = getRegistry()
-			genesisOriginals.reserve = genesisOriginals.reserve.plus(reserveCut)
-			return genesisOriginals as GenesisOriginals
-		}
-
-		export function reduceReserveCut(consumedReserveCut: BigInt): GenesisOriginals {
-			let genesisOriginals = getRegistry()
-			genesisOriginals.reserve = genesisOriginals.reserve.minus(consumedReserveCut)
-			return genesisOriginals as GenesisOriginals
-		}
+		return registry as Registry
 	}
+
+	export function increaseTokensMinted(registryId: string): Registry {
+		let genesisOriginals = getRegistry(registryId)
+		genesisOriginals.tokensMinted = genesisOriginals.tokensMinted.plus(integer.ONE)
+		return genesisOriginals as Registry
+	}
+
+	export function addReserveCut(registryId: string, reserveCut: BigInt): Registry {
+		let genesisOriginals = getRegistry(registryId)
+		genesisOriginals.reserve = genesisOriginals.reserve.plus(reserveCut)
+		return genesisOriginals as Registry
+	}
+
+	export function reduceReserveCut(registryId: string, consumedReserveCut: BigInt): Registry {
+		let genesisOriginals = getRegistry(registryId)
+		genesisOriginals.reserve = genesisOriginals.reserve.minus(consumedReserveCut)
+		return genesisOriginals as Registry
+	}
+
 }

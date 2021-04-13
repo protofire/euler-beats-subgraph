@@ -1,4 +1,4 @@
-type GenesisOriginals @entity {
+type Registry @entity {
 	id: ID!
 	tokens: [Token!]! @derivedFrom(field: "registry")
 	tokensMinted: BigInt!
@@ -12,7 +12,7 @@ type Token @entity {
  	id: ID!
 	owner: Account!
 	seed: BigInt!
-	registry: GenesisOriginals!
+	registry: Registry!
 	timestamp: BigInt!
 	printsMinted: BigInt!
 	nextPrintPrice: BigInt!
