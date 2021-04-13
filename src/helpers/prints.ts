@@ -1,4 +1,5 @@
-import { BigInt, ADDRESS_ZERO } from '@graphprotocol/graph-ts'
+import { BigInt } from '@graphprotocol/graph-ts'
+import { ADDRESS_ZERO } from '@protofire/subgraph-toolkit'
 import { Print } from '../../generated/schema';
 import { shared } from "./shared";
 

@@ -4,13 +4,18 @@ import {
 	PrintMinted as PrintMintedEvent,
 	PrintBurned as PrintBurnedEvent
 } from "../generated/EulerBeats-genesis/EulerBeatsGenesis";
+import { shared } from "./helpers";
+
 
 import { ADDRESS_ZERO } from '@protofire/subgraph-toolkit'
 
 import { accounts, registry, tokens, prints, royalties } from "./helpers";
+import { Print, Token } from "../generated/schema";
 
 export function handleTransferSingle(event: TransferSingleEvent): void {
 	let fromId = event.params.from.toHex()
+	let toId = event.params.to.toHex()
+	let id = event.params.id.toHex()
 
 	// skip minting handling
 	// minting: transaction made by address zero
@@ -18,9 +23,24 @@ export function handleTransferSingle(event: TransferSingleEvent): void {
 		return
 	}
 
-	let token = tokens.loadGenericToken(event.params.id.toHex())
-	token.owner = event.params.to.toHex()
-	token.save()
+	// try to load a token or print 
+	// should I create a generic token an use "implement" for originals and prints?
+	// this is easier but less elegant
+	let token = Token.load(id)
+	if (token != null) {
+		token.owner = toId
+		token.save()
+	} else {
+		let print = Print.load(id)
+		if (print == null) {
+			shared.logs.logCritical(
+				"handleTransferSingle",
+				"Couldn't find print or token w/ id: " + id)
+		}
+		print.owner = toId
+		print.save()
+	}
+
 }
 
 // _mint yields handleTransferSingle 

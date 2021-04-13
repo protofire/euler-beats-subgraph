@@ -6,12 +6,12 @@ type GenesisOriginals @entity {
 	maxSeedSupply: BigInt!
 	maxPrintSupply: BigInt!
 	reserve: BigInt!
-} 
+}
 
 type Token @entity {
  	id: ID!
-	seed: BigInt!
 	owner: Account!
+	seed: BigInt!
 	registry: GenesisOriginals!
 	timestamp: BigInt!
 	printsMinted: BigInt!
@@ -23,10 +23,10 @@ type Token @entity {
 
 type Print @entity {
  	id: ID!
+	owner: Account
 	token: Token!
     pricePaid: BigInt!
     royalty: Royalty!
-	owner: Account
 }
 
 type Royalty @entity {

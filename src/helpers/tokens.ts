@@ -16,10 +16,7 @@ export namespace tokens {
 	}
 
 	export function changeOwner(tokenId: string, newOwnerId: string): Token {
-		let token = Token.load(tokenId)
-		if (token == null) {
-			// throw err
-		}
+		let token = loadGenericToken(tokenId)
 		token.owner = newOwnerId
 		return token as Token
 	}
