@@ -1,3 +1,45 @@
-type Original @entity {
- id: ID!
+type Registry @entity {
+	id: ID!
+	tokens: [Token!]! @derivedFrom(field: "registry")
+	tokensMinted: BigInt!
+	totalPrintsMinted: BigInt!
+	maxSeedSupply: BigInt!
+	maxPrintSupply: BigInt!
+	reserve: BigInt!
+}
+
+type Token @entity {
+ 	id: ID!
+	owner: Account!
+	seed: BigInt!
+	registry: Registry!
+	timestamp: BigInt!
+	printsMinted: BigInt!
+	nextPrintPrice: BigInt!
+    nextBurnPrice: BigInt!
+	prints: [Print!]! @derivedFrom(field: "token")
+
+}
+
+type Print @entity {
+ 	id: ID!
+	owner: Account
+	token: Token!
+    pricePaid: BigInt!
+    royalty: Royalty!
+}
+
+type Royalty @entity {
+	id: ID!
+	amount: BigInt!
+	recipient: Account!
+	print: Print!
+}
+
+type Account @entity {
+	id: ID!
+	prints: [Print!]! @derivedFrom(field: "owner")
+	tokens: [Token!]! @derivedFrom(field: "owner")
+	royalties: [Royalty!] @derivedFrom(field: "recipient")
+	burnRewardAmount: BigInt!
 }
