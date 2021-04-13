@@ -29,5 +29,11 @@ export namespace registry {
 			genesisOriginals.reserve = genesisOriginals.reserve.plus(reserveCut)
 			return genesisOriginals as GenesisOriginals
 		}
+
+		export function reduceReserveCut(consumedReserveCut: BigInt): GenesisOriginals {
+			let genesisOriginals = getRegistry()
+			genesisOriginals.reserve = genesisOriginals.reserve.minus(consumedReserveCut)
+			return genesisOriginals as GenesisOriginals
+		}
 	}
 }

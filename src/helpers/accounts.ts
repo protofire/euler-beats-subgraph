@@ -1,3 +1,5 @@
+import { integer } from '@protofire/subgraph-toolkit'
+
 import { Account } from '../../generated/schema'
 
 export namespace accounts {
@@ -5,6 +7,7 @@ export namespace accounts {
 		let account = Account.load(accountId)
 		if (account == null) {
 			account = new Account(accountId)
+			account.burnRewardAmount = integer.ZERO
 		}
 		return account as Account
 	}

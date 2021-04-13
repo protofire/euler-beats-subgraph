@@ -1,4 +1,4 @@
 
 export namespace registry {
-	export let genesisOriginalsId = "foo"
+	export let genesisOriginalsId = "0x0"
 }

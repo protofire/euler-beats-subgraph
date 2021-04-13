@@ -30,6 +30,12 @@ export namespace tokens {
 		return token as Token
 	}
 
+	export function reducePrintsMinted(tokenId: string): Token {
+		let token = loadGenericToken(tokenId)
+		token.printsMinted = token.printsMinted.minus(integer.ONE)
+		return token as Token
+	}
+
 	// function getNewGenericToken(tokenId: string, registryId: string, ownerId: string, timestamp: BigInt): Token {
 	// 	let token = new Token(tokenId)
 	// 	token.registry = registryId
