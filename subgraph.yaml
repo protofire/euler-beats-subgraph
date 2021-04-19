@@ -16,9 +16,13 @@ dataSources:
       entities:
         - Account
         - Royalty
+        - Mint
+        - Burn
+        - Transfer
+        - Original
         - Print
         - Token
-        - GenesisOriginals
+        - Registry
       abis:
         - name: EulerBeatsGenesis
           file: ./abis/EulerBeatsGenesis.json
@@ -48,9 +52,13 @@ dataSources:
       entities:
         - Account
         - Royalty
+        - Mint
+        - Burn
+        - Transfer
+        - Original
         - Print
         - Token
-        - EnigmaOriginals
+        - Registry
       abis:
         - name: EulerBeatsEnigma
           file: ./abis/EulerBeatsEnigma.json
