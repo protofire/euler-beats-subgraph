@@ -3,55 +3,88 @@ import {
 	TransferSingle as TransferSingleEvent,
 	MintOriginal as MintOriginalEvent,
 	PrintMinted as PrintMintedEvent,
-	PrintBurned as PrintBurnedEvent
+	PrintBurned as PrintBurnedEvent,
+	TransferBatch as TransferBatchEvent
 } from "../generated/EulerBeats-genesis/EulerBeatsGenesis";
-import { Print, Token } from "../generated/schema";
 
-import { accounts, registry, tokens, prints, royalties, shared } from "./helpers";
+import { accounts, registry, tokens, transactions, shared } from "./helpers";
 import { registry as registryConstants } from './constants'
 import { BigInt } from '@graphprotocol/graph-ts';
+import { Original } from '../generated/schema';
+
+function handleTransfer(
+	fromId: string, toId: string,
+	tokenId: string, timestamp: BigInt
+): void {
+	let transferId = transactions.transfer.composeNewTransferId(fromId, toId)
+	let transfer = transactions.transfer.getNewTransfer(transferId, fromId, toId, tokenId, timestamp)
+	transfer.save()
+
+	// Try to load original and change owner 
+	// otherwise load print and proceed
+
+	let original = Original.load(tokenId)
+	if (original != null) {
+		original.owner = toId
+		original.save()
+	} else {
+		let print = tokens.prints.loadPrint(tokenId)
+		print.owner = toId
+		print.save()
+	}
+}
 
 export function handleTransferSingle(event: TransferSingleEvent): void {
 	let fromId = event.params.from.toHex()
 	let toId = event.params.to.toHex()
-	let id = event.params.id.toHex()
+	let tokenId = event.params.id.toHex()
+	let timestamp = event.block.timestamp
 
-	// skip minting handling
+	// skip minting or burning
 	// minting: transaction made by address zero
-	if (fromId == ADDRESS_ZERO) {
+	// burning: transaction made to address zero
+	if (fromId == ADDRESS_ZERO || toId == ADDRESS_ZERO) {
+		return
+	}
+	handleTransfer(fromId, toId, tokenId, timestamp)
+}
+
+
+export function handleTransferBatch(event: TransferBatchEvent): void {
+	let fromId = event.params.from.toHex()
+	let toId = event.params.to.toHex()
+	let idList = event.params.ids
+	let timestamp = event.block.timestamp
+
+	// skip minting or burning
+	// minting: transaction made by address zero
+	// burning: transaction made to address zero
+	if (fromId == ADDRESS_ZERO || toId == ADDRESS_ZERO) {
 		return
 	}
 
-	// try to load a token or print 
-	// should I create a generic token an use "implement" for originals and prints?
-	// this is easier but less elegant
-	let token = Token.load(id)
-	if (token != null) {
-		token.owner = toId
-		token.save()
-	} else {
-		let print = Print.load(id)
-		if (print == null) {
-			shared.logs.logCritical(
-				"handleTransferSingle",
-				"Couldn't find print or token w/ id: " + id)
-		}
-		print.owner = toId
-		print.save()
+	for (let i = 0; i < idList.length; ++i) {
+		let tokenId = idList[i];
+		handleTransfer(fromId, toId, tokenId.toHex(), timestamp)
 	}
-
 }
 
-function handleMint(registryId: string, ownerId: string, timestamp: BigInt, seed: BigInt): void {
-	let token = tokens.getNewToken(registryId, seed, ownerId, timestamp)
+
+
+function handleMintOriginal(registryId: string, ownerId: string, timestamp: BigInt, seed: BigInt): void {
+	let token = tokens.originals.getNewOriginal(registryId, seed, ownerId, timestamp)
 	token.save()
 
-	let currentRegistry = registry.increaseTokensMinted(registryId)
+	let currentRegistry = registry.increaseOriginalsMinted(registryId)
 	currentRegistry.save()
+
+	let mintId = transactions.mint.composeNewMintId(token.id, ownerId)
+	let mint = transactions.mint.getNewMint(mintId, ownerId, token.id, timestamp)
+	mint.save()
 }
 
-export function handleGensisMintOriginal(event: MintOriginalEvent): void {
-	handleMint(
+export function handleGenesisMintOriginal(event: MintOriginalEvent): void {
+	handleMintOriginal(
 		registryConstants.genesisId,
 		event.params.to.toHex(),
 		event.block.timestamp,
@@ -60,7 +93,7 @@ export function handleGensisMintOriginal(event: MintOriginalEvent): void {
 }
 
 export function handleEnigmaMintOriginal(event: MintOriginalEvent): void {
-	handleMint(
+	handleMintOriginal(
 		registryConstants.enigmaId,
 		event.params.to.toHex(),
 		event.block.timestamp,
@@ -69,36 +102,45 @@ export function handleEnigmaMintOriginal(event: MintOriginalEvent): void {
 }
 
 function handlePrintMinted(registryId: string, event: PrintMintedEvent): void {
-	let tokenId = event.params.seed.toHex()
+	let originalId = event.params.seed.toHex()
 	let royaltyRecipient = event.params.royaltyRecipient.toHex()
 	let printId = event.params.id.toHex()
-	let royaltyId = royalties.composeNewRoyaltyId(royaltyRecipient, printId)
+	let toId = event.params.to.toHex()
+	let timestamp = event.block.timestamp
+	let royaltyId = transactions.royalties.composeNewRoyaltyId(royaltyRecipient, printId)
 
 	// at contract level, reserveCut value is sent as "nextBurnPrice" in *emit PrintMinted*
-	let genesisOriginalsRegistry = registry.addReserveCut(registryId, event.params.nextBurnPrice)
+	let genesisOriginalsRegistry = registry.increaseReserveCut(registryId, event.params.nextBurnPrice)
 	genesisOriginalsRegistry.save()
 
-	let token = tokens.increasePrintsMinted(tokenId)
+	let token = tokens.originals.increasePrintsMinted(originalId)
 	token.nextBurnPrice = event.params.nextBurnPrice
 	token.nextPrintPrice = event.params.nextPrintPrice
 	token.save()
 
-	let royalty = royalties.getNewRoyalty(
+	let print = tokens.prints.getNewPrint(
+		printId,
+		originalId,
+		toId,
+		royaltyId,
+		event.params.pricePaid,
+		timestamp
+	)
+	print.save()
+
+	let royalty = transactions.royalties.getNewRoyalty(
 		royaltyId,
 		royaltyRecipient,
 		printId,
-		event.params.royaltyPaid
+		event.params.royaltyPaid,
+		timestamp
 	)
 	royalty.save()
 
-	let print = prints.getNewPrint(
-		printId,
-		tokenId,
-		event.params.to.toHex(),
-		royaltyId,
-		event.params.pricePaid
-	)
-	print.save()
+
+	let mintId = transactions.mint.composeNewMintId(token.id, toId)
+	let mint = transactions.mint.getNewMint(mintId, toId, token.id, timestamp)
+	mint.save()
 }
 
 
@@ -119,16 +161,16 @@ function handlePrintBurned(registryId: string, event: PrintBurnedEvent): void {
 	let genesisOriginalsRegistry = registry.reduceReserveCut(registryId, burnPrice)
 	genesisOriginalsRegistry.save()
 
-	let token = tokens.reducePrintsMinted(tokenId)
+	let token = tokens.originals.reducePrintsMinted(tokenId)
 	token.nextBurnPrice = event.params.nextBurnPrice
 	token.nextPrintPrice = event.params.nextPrintPrice
 	token.save()
 
-	let print = prints.burnPrint(printId)
+	let print = tokens.prints.burnPrint(printId)
 	print.save()
 
 	let account = accounts.getAccount(accountId)
-	account.burnRewardAmount = account.burnRewardAmount.plus(burnPrice)
+	account.ethBalance = account.ethBalance.plus(burnPrice)
 	account.save()
 }
 

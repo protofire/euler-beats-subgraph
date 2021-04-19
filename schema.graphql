@@ -1,45 +1,247 @@
-type Registry @entity {
-	id: ID!
-	tokens: [Token!]! @derivedFrom(field: "registry")
-	tokensMinted: BigInt!
-	totalPrintsMinted: BigInt!
-	maxSeedSupply: BigInt!
-	maxPrintSupply: BigInt!
-	reserve: BigInt!
-}
 
-type Token @entity {
+interface Token {
+	"Internal ID used for indexation"
  	id: ID!
+
+	"The ID of the token Owner's" 
 	owner: Account!
-	seed: BigInt!
-	registry: Registry!
+
+	"Token minting timestamp"
 	timestamp: BigInt!
+
+	"Transactions where this token was involved"
+	transactions: [Transaction!]! @derivedFrom(field: "token")
+}
+
+type Original implements Token @entity {
+ 	"Internal ID used for indexation"
+ 	id: ID!
+
+	"The ID of the token Owner's" 
+	owner: Account!
+
+	"Token minting timestamp"
+	timestamp: BigInt!
+
+	"Transactions where this token was involved"
+	transactions: [Transaction!]! @derivedFrom(field: "token")
+	 
+	"Seed generated for this original" 
+	seed: BigInt!
+
+	"Which side of the Euler record: Genesis or Enigma"
+	registry: Registry!
+
+	"Total of prints minted for this original (burning will decrease this value)"
 	printsMinted: BigInt!
+
+	"Price for the next print to be minted"
 	nextPrintPrice: BigInt!
+
+	"Price for the next print to be burned"
     nextBurnPrice: BigInt!
-	prints: [Print!]! @derivedFrom(field: "token")
+
+	"Prints for this original (also includes burned ones)"
+	prints: [Print!]! @derivedFrom(field: "original")
 
 }
 
-type Print @entity {
+type Print implements Token @entity {
+ 	"Internal ID used for indexation"
  	id: ID!
-	owner: Account
-	token: Token!
+
+	"The ID of the token Owner's" 
+	owner: Account!
+
+	"Token minting timestamp"
+	timestamp: BigInt!
+
+	"Transactions where this token was involved"
+	transactions: [Transaction!]! @derivedFrom(field: "token")
+	 
+	"The current status for this print"
+	burned: Boolean!
+
+	"Which original it belongs to"
+	original: Original!
+
+	"price Paid at mint time"
     pricePaid: BigInt!
+
+	"royalty yield at mint time"
     royalty: Royalty!
 }
 
-type Royalty @entity {
-	id: ID!
-	amount: BigInt!
-	recipient: Account!
-	print: Print!
+enum RegistryName {
+	Genesis
+	Enigma
 }
 
-type Account @entity {
+type Registry @entity {
+ 	"Internal ID used for indexation"
 	id: ID!
+
+	"Resitry name as a constant"
+	name: RegistryName!
+
+ 	"Originals minted"
+	originals: [Original!]! @derivedFrom(field: "registry")
+
+	"The amount of originals minted"
+	totalOriginalsMinted: BigInt!
+
+	"Originals max cap"
+	maxSeedSupply: BigInt!
+
+	"Liquidity reserve for burning"
+	reserve: BigInt!
+
+	"The amount of prints minted for all originals"
+	totalPrintsMinted: BigInt!
+
+	"Prints max cap for each original"
+	maxPrintSupply: BigInt!
+}
+
+enum TranasctionType { 
+	MINT 
+	BURN
+	TRANSFER
+	ROYALTY 
+ }
+
+
+interface Transaction {
+ 	"Internal ID used for indexation"
+	id: ID!
+
+	"Seller account"
+	from: Account
+
+	"Buyer account"
+	to: Account
+
+	"Original or Print traded"
+	token: Token
+
+	"Amount of tokens or ether"
+	amount: BigInt
+
+	"Transaction creation timestamp"
+	timestamp: BigInt!
+
+	"Current transaction type"
+	type: TranasctionType!
+}
+
+type Mint implements Transaction @entity {
+	"Internal ID used for indexation"
+	id: ID!
+
+	"Seller account"
+	from: Account
+
+	"Buyer account"
+	to: Account
+
+	"Original or Print traded"
+	token: Token
+
+	"Amount of tokens or ether"
+	amount: BigInt
+
+	"Transaction creation timestamp"
+	timestamp: BigInt!
+
+	"Current transaction type"
+	type: TranasctionType!
+}
+
+type Transfer implements Transaction @entity {
+	"Internal ID used for indexation"
+	id: ID!
+
+	"Seller account"
+	from: Account
+
+	"Buyer account"
+	to: Account
+
+	"Original or Print traded"
+	token: Token
+
+	"Amount of tokens or ether"
+	amount: BigInt
+
+	"Transaction creation timestamp"
+	timestamp: BigInt!
+
+	"Current transaction type"
+	type: TranasctionType!
+}
+
+type Burn implements Transaction @entity {
+	"Internal ID used for indexation"
+	id: ID!
+
+	"Seller account"
+	from: Account
+
+	"Buyer account"
+	to: Account
+
+	"Original or Print traded"
+	token: Token
+
+	"Amount of tokens or ether"
+	amount: BigInt
+
+	"Transaction creation timestamp"
+	timestamp: BigInt!
+
+	"Current transaction type"
+	type: TranasctionType!
+}
+
+type Royalty implements Transaction @entity {
+	"Internal ID used for indexation"
+	id: ID!
+
+	"Seller account"
+	from: Account
+
+	"Buyer account"
+	to: Account
+
+	"Original or Print traded"
+	token: Token
+
+	"Amount of tokens or ether"
+	amount: BigInt
+
+	"Transaction creation timestamp"
+	timestamp: BigInt!
+
+	"Current transaction type"
+	type: TranasctionType!
+} 
+
+type Account @entity {
+	"Internal ID used for indexation"
+	id: ID!
+
+	"owned prints"
 	prints: [Print!]! @derivedFrom(field: "owner")
+	
+	"tokens prints"
 	tokens: [Token!]! @derivedFrom(field: "owner")
-	royalties: [Royalty!] @derivedFrom(field: "recipient")
-	burnRewardAmount: BigInt!
+	
+	"Transactions sent by this account"
+	sent: [Transaction!] @derivedFrom(field: "from")
+ 
+	"Transactions recieved by this account"
+	recieved: [Transaction!] @derivedFrom(field: "to")
+
+	"ath recieved as form of token burning"
+	ethBalance: BigInt!
 }

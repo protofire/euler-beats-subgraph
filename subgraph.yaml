@@ -28,7 +28,11 @@ dataSources:
         - event: PrintMinted(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint256,indexed address)
           handler: handleGenesisPrintMinted
         - event: PrintBurned(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256)
-          handler: handleGensisPrintBurned
+          handler: handleGenesisPrintBurned
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: EulerBeats-enigma
@@ -57,4 +61,8 @@ dataSources:
           handler: handleEnigmaPrintMinted
         - event: PrintBurned(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handleEnigmaPrintBurned
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
       file: ./src/mapping.ts
