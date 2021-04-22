@@ -230,6 +230,9 @@ type Account @entity {
 	"Internal ID used for indexation"
 	id: ID!
 
+	"Account evm address"
+	address: Bytes
+
 	"owned prints"
 	prints: [Print!]! @derivedFrom(field: "owner")
 	

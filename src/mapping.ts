@@ -7,9 +7,9 @@ import {
 	TransferBatch as TransferBatchEvent
 } from "../generated/EulerBeats-genesis/EulerBeatsGenesis";
 
-import { accounts, registry, tokens, transactions, shared } from "./helpers";
+import { accounts, registry, tokens, transactions } from "./helpers";
 import { registry as registryConstants } from './constants'
-import { BigInt } from '@graphprotocol/graph-ts';
+import { BigInt, Bytes } from '@graphprotocol/graph-ts';
 import { Original } from '../generated/schema';
 
 function handleTransfer(
@@ -71,12 +71,17 @@ export function handleTransferBatch(event: TransferBatchEvent): void {
 
 
 
-function handleMintOriginal(registryId: string, ownerId: string, timestamp: BigInt, seed: BigInt): void {
+function handleMintOriginal(registryId: string, ownerAddress: Bytes, timestamp: BigInt, seed: BigInt): void {
+	let ownerId = ownerAddress.toHex()
 	let token = tokens.originals.getNewOriginal(registryId, seed, ownerId, timestamp)
 	token.save()
 
 	let currentRegistry = registry.increaseOriginalsMinted(registryId)
 	currentRegistry.save()
+
+	// create account
+	let account = accounts.getAccount(ownerAddress)
+	account.save()
 
 	let mintId = transactions.mint.composeNewMintId(token.id, ownerId)
 	let mint = transactions.mint.getNewMint(mintId, ownerId, token.id, timestamp)
@@ -86,7 +91,7 @@ function handleMintOriginal(registryId: string, ownerId: string, timestamp: BigI
 export function handleGenesisMintOriginal(event: MintOriginalEvent): void {
 	handleMintOriginal(
 		registryConstants.genesisId,
-		event.params.to.toHex(),
+		event.params.to,
 		event.block.timestamp,
 		event.params.seed
 	)
@@ -95,7 +100,7 @@ export function handleGenesisMintOriginal(event: MintOriginalEvent): void {
 export function handleEnigmaMintOriginal(event: MintOriginalEvent): void {
 	handleMintOriginal(
 		registryConstants.enigmaId,
-		event.params.to.toHex(),
+		event.params.to,
 		event.block.timestamp,
 		event.params.seed
 	)
@@ -105,13 +110,18 @@ function handlePrintMinted(registryId: string, event: PrintMintedEvent): void {
 	let originalId = event.params.seed.toHex()
 	let royaltyRecipient = event.params.royaltyRecipient.toHex()
 	let printId = event.params.id.toHex()
-	let toId = event.params.to.toHex()
+	let accountAddress = event.params.to
+	let toId = accountAddress.toHex()
 	let timestamp = event.block.timestamp
 	let royaltyId = transactions.royalties.composeNewRoyaltyId(royaltyRecipient, printId)
 
 	// at contract level, reserveCut value is sent as "nextBurnPrice" in *emit PrintMinted*
 	let genesisOriginalsRegistry = registry.increaseReserveCut(registryId, event.params.nextBurnPrice)
 	genesisOriginalsRegistry.save()
+
+	// create account
+	let account = accounts.getAccount(accountAddress)
+	account.save()
 
 	let token = tokens.originals.increasePrintsMinted(originalId)
 	token.nextBurnPrice = event.params.nextBurnPrice
@@ -156,7 +166,7 @@ function handlePrintBurned(registryId: string, event: PrintBurnedEvent): void {
 	let burnPrice = event.params.priceReceived
 	let tokenId = event.params.seed.toHex()
 	let printId = event.params.id.toHex()
-	let accountId = event.params.to.toHex()
+	let accountAddress = event.params.to
 
 	let genesisOriginalsRegistry = registry.reduceReserveCut(registryId, burnPrice)
 	genesisOriginalsRegistry.save()
@@ -169,7 +179,7 @@ function handlePrintBurned(registryId: string, event: PrintBurnedEvent): void {
 	let print = tokens.prints.burnPrint(printId)
 	print.save()
 
-	let account = accounts.getAccount(accountId)
+	let account = accounts.getAccount(accountAddress)
 	account.ethBalance = account.ethBalance.plus(burnPrice)
 	account.save()
 }
