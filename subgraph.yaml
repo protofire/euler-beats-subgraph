@@ -1,0 +1,76 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: EulerBeats-genesis
+    network: mainnet
+    source:
+      address: "0x8754F54074400CE745a7CEddC928FB1b7E985eD6"
+      abi: EulerBeatsGenesis
+      startBlock: 11850423
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Account
+        - Royalty
+        - Mint
+        - Burn
+        - Transfer
+        - Original
+        - Print
+        - Token
+        - Registry
+      abis:
+        - name: EulerBeatsGenesis
+          file: ./abis/EulerBeatsGenesis.json
+      eventHandlers:
+        - event: MintOriginal(indexed address,uint256,indexed uint256)
+          handler: handleGenesisMintOriginal
+        - event: PrintMinted(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleGenesisPrintMinted
+        - event: PrintBurned(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleGenesisPrintBurned
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: EulerBeats-enigma
+    network: mainnet
+    source:
+      address: "0xa98771a46Dcb34B34cDAD5355718F8a97C8E603e"
+      abi: EulerBeatsEnigma
+      startBlock: 12103580
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Account
+        - Royalty
+        - Mint
+        - Burn
+        - Transfer
+        - Original
+        - Print
+        - Token
+        - Registry
+      abis:
+        - name: EulerBeatsEnigma
+          file: ./abis/EulerBeatsEnigma.json
+      eventHandlers:
+        - event: MintOriginal(indexed address,uint256,indexed uint256)
+          handler: handleEnigmaMintOriginal
+        - event: PrintMinted(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256,uint256,indexed address)
+          handler: handleEnigmaPrintMinted
+        - event: PrintBurned(indexed address,uint256,indexed uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleEnigmaPrintBurned
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
+      file: ./src/mapping.ts
