@@ -1,4 +1,6 @@
 specVersion: 0.0.2
+description: This is an lightweight approach. Includes both Genesis and Enigma
+repository: https://github.com/protofire/euler-beats-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
