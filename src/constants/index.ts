@@ -9,8 +9,8 @@ export namespace registry {
 
 
 export namespace transaction {
-	export let mintType = "MINT "
+	export let mintType = "MINT"
 	export let burnType = "BURN"
 	export let transferType = "TRANSFER"
-	export let royaltyType = "ROYALTY "
+	export let royaltyType = "ROYALTY"
 }
