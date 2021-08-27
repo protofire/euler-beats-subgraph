@@ -1,4 +1,4 @@
-# Euler Beats 
+# [Euler Beats](https://eulerbeats.com/)
 
 ## Registry 
 
